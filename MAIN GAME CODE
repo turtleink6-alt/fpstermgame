@@ -1,0 +1,76 @@
+#!/bin/bash
+
+ammo=3
+kills=0
+health=3
+room=1
+
+function draw_view() {
+    clear
+    echo "╔════════════════════════════╗"
+    echo "║        FPS BASH v0.1       ║"
+    echo "╚════════════════════════════╝"
+    echo ""
+    echo "You are in Room #$room"
+    echo "Health: $health   Ammo: $ammo   Kills: $kills"
+    echo ""
+    echo "  [🧱]      "
+    echo "   ||       "
+    if [[ $enemy -eq 1 ]]; then
+        echo "  👾 Enemy ahead!"
+    else
+        echo "  ... It's quiet."
+    fi
+    echo ""
+    echo "Actions: [f] Forward  [s] Shoot  [r] Reload  [q] Quit"
+    echo ""
+}
+
+function game_over() {
+    echo ""
+    echo "☠️  You died. Final kills: $kills"
+    exit
+}
+
+while true; do
+    enemy=$((RANDOM % 4 == 0 ? 1 : 0))  # 25% chance of enemy
+
+    draw_view
+    read -n1 -p "Enter action: " action
+    echo ""
+
+    if [[ $action == "q" ]]; then
+        echo "👋 Quitting. Final score: $kills kills."
+        exit
+    elif [[ $action == "f" ]]; then
+        if [[ $enemy -eq 1 ]]; then
+            echo "👾 The enemy attacks as you try to run!"
+            ((health--))
+            if [[ $health -le 0 ]]; then
+                game_over
+            fi
+        else
+            echo "🚶 You move to the next room..."
+            ((room++))
+        fi
+    elif [[ $action == "s" ]]; then
+        if [[ $ammo -le 0 ]]; then
+            echo "🔫 Click! You're out of ammo!"
+        elif [[ $enemy -eq 1 ]]; then
+            echo "💥 Bang! Enemy down!"
+            ((kills++))
+            ((ammo--))
+            enemy=0
+        else
+            echo "💥 You shoot into the darkness. Nothing there."
+            ((ammo--))
+        fi
+    elif [[ $action == "r" ]]; then
+        echo "🔄 Reloading..."
+        ammo=3
+    else
+        echo "❓ Invalid action."
+    fi
+
+    sleep 1
+done
